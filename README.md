@@ -1,3 +1,3 @@
 # FirstABC
 
-[https://play.google.com/store/apps/details?id=com.morrisonlive.firstabc]
+https://play.google.com/store/apps/details?id=com.morrisonlive.firstabc
