@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">FirstABC</string>
+    <string name="action_settings">Settings</string>
+    <string name="GuessLetters">Guess Letters</string>
+    <string name="FindLetters">Find Letters</string>
+    <string name="A">A</string>
+    <string name="B">B</string>
+    <string name="C">C</string>
+    <string name="D">D</string>
+
+    <string name="title_activity_record_letters">RecordLettersActivity</string>
+    <string name="record_button">Start Recording</string>
+    <string name="record_instructions">
+        Each letter in the alphabet will appear one at a time followed by some phrases. Say each letter or phrase once they appear. Recording is set to 1 second for each letter so say them as soon as they appear.
+    </string>
+    <string name="action_record">Record Letters</string>
+    <string name="find_letters">Find Letters</string>
+    <string name="title_activity_find_letters">FindLetters</string>
+    <string name="PlayAgain">Play Again</string>
+    <string name="button">Play Letter</string>
+</resources>
