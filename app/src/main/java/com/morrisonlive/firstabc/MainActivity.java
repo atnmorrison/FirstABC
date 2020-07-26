@@ -16,13 +16,16 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
 
-
+    File selectedVoiceDir;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        selectedVoiceDir = this.getDir("default", this.MODE_PRIVATE);
         setupLetterButtons();
     }
 
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     int blue = (int)Math.floor(Math.random()*255);
 
                     letter.setTextColor(Color.argb(255, red, green, blue));
-                    AudioUtil.playBackLetter(mychar,getFilesDir());
+                    AudioUtil.playBackLetter(mychar, selectedVoiceDir.getPath());
 
                 }
             });
@@ -116,11 +119,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.record_letters:
-                startRecordLettersActivity();
+            case R.id.settings:
+                startSettingsActivity();
                 return true;
             case R.id.find_letters:
                 startFindLettersActivity();
+                return true;
+            case R.id.record_letters:
+                startRecordActivity();
+                return true;
+            case R.id.name_the_letter:
+                startNameTheLetter();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -128,10 +137,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void startRecordLettersActivity() {
-        Intent intent = new Intent(this, RecordLettersActivity.class);
+    private void startSettingsActivity() {
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
+
+
 
     private void startFindLettersActivity() {
         Intent intent = new Intent(this, FindLettersActivity.class);
@@ -139,6 +150,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void startRecordActivity() {
+        Intent intent = new Intent(this, RecordLettersActivity.class);
+        startActivity(intent);
+    }
 
+    private void startNameTheLetter() {
+        Intent intent = new Intent(this, NameTheLetter.class);
+        startActivity(intent);
+    }
 
 }

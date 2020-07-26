@@ -2,7 +2,9 @@ package com.morrisonlive.firstabc;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.database.DataSetObserver;
 import android.media.MediaRecorder;
+import android.media.audiofx.NoiseSuppressor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -11,7 +13,11 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -23,6 +29,7 @@ import androidx.core.content.ContextCompat;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -38,6 +45,7 @@ public class RecordLettersActivity extends AppCompatActivity {
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
+    private Spinner voiceOptions;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
@@ -107,7 +115,16 @@ public class RecordLettersActivity extends AppCompatActivity {
 
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.instructions);
+        mContentView = findViewById(R.id.recordContainer);
+        voiceOptions = findViewById(R.id.selectedVoice);
+
+
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+        adapter.add("New Voice");
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        voiceOptions.setAdapter(adapter);
+
+
         mRecorder = new MediaRecorder();
 
 
@@ -159,7 +176,7 @@ public class RecordLettersActivity extends AppCompatActivity {
                 recording = false;
                 characterIndex = 0;
 
-                new CountDownTimer(1500 * (letters.length+1), 1500) {
+                new CountDownTimer(1000 * (letters.length+1), 1000) {
 
                     @Override
                     public void onTick(long elapsed) {
@@ -238,13 +255,14 @@ public class RecordLettersActivity extends AppCompatActivity {
 
     private void startRecording(char c) {
         recording = true;
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
         try{
             //the voice that is being recorded
             String selectedVoice = "default";
-            mRecorder.setOutputFile(getFilesDir()+ selectedVoice +"_letter_"+c+".3gp");
+            File selectedVoiceDir = this.getDir(selectedVoice, this.MODE_PRIVATE);
+            mRecorder.setOutputFile(selectedVoiceDir.getPath() +"letter_"+c+".3gp");
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             mRecorder.prepare();
             mRecorder.start();

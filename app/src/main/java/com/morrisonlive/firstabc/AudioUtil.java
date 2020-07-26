@@ -12,14 +12,11 @@ public class AudioUtil {
     private static MediaPlayer mPlayer;
     private static ArrayList<String> files = new ArrayList<>();
 
-    public static void playFindLetter(char c, File filesDir) {
+    public static void playFindLetter(char c, String filesDir) {
 
         String selectedVoice = "default";
-        String findClip = filesDir+selectedVoice+"_letter_0.3gp";
-        final String clipName = filesDir+selectedVoice+"_letter_"+c+".3gp";
-
-        Log.e("Audio Util", "Playing find letter"+clipName);
-        Log.e("Audio Util", "findClip"+findClip);
+        String findClip = filesDir+"letter_0.3gp";
+        final String clipName = filesDir+"letter_"+c+".3gp";
 
         MediaPlayer playFindLetter = new MediaPlayer();
         try {
@@ -96,9 +93,9 @@ public class AudioUtil {
 
 
 
-    public static void playBackLetter(char c, File filesDir) {
-        String selectedVoice = "default";
-        String clipName = filesDir+selectedVoice+"_letter_"+c+".3gp";
+    public static void playBackLetter(char c, String filesDir) {
+
+        String clipName = filesDir+"letter_"+c+".3gp";
 
         if(mPlayer == null) {
             initLetterPlayer();

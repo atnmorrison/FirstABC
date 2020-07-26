@@ -8,6 +8,13 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".NameTheLetter"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_name_the_letter"
+            android:theme="@style/FullscreenTheme"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -15,12 +22,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.morrisonlive.firstabc.CorrectAnswer" android:parentActivityName=".FindLettersActivity"/>
-        <activity android:name="com.morrisonlive.firstabc.FindLettersActivity"
-            android:parentActivityName=".MainActivity"/>
-        <activity android:name="com.morrisonlive.firstabc.RecordLettersActivity"
+        <activity
+            android:name=".CorrectAnswer"
+            android:parentActivityName=".FindLettersActivity" />
+        <activity
+            android:name=".FindLettersActivity"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".RecordLettersActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity"></activity>
     </application>
 
 </manifest>

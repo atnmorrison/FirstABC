@@ -11,11 +11,22 @@
     <string name="title_activity_record_letters">RecordLettersActivity</string>
     <string name="record_button">Start Recording</string>
     <string name="record_instructions">
-        Each letter in the alphabet will appear one at a time followed by some phrases. Say each letter or phrase once they appear. Recording is set to 1 second for each letter so say them as soon as they appear.
+        Each letter in the alphabet will appear one at a time followed by some phrases. Say each letter or phrase once they appear. Recording is set to 1 second for letters and 3 seconds for phrases.
     </string>
     <string name="action_record">Record Letters</string>
     <string name="find_letters">Find Letters</string>
     <string name="title_activity_find_letters">FindLetters</string>
     <string name="PlayAgain">Play Again</string>
     <string name="button">Play Letter</string>
+    <string name="title_activity_name_the_letter">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="name_the_letter">Name the Letter</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="audio_header">App Settings</string>
+    <string name="settings">Settings</string>
+
+
 </resources>

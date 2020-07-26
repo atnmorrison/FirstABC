@@ -18,13 +18,14 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.io.File;
 import java.util.Objects;
 
 public class FindLettersActivity extends AppCompatActivity {
 
     Button playButton;
     FindLetterViewModel model;
-
+    File selectedVoiceDir;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -32,6 +33,7 @@ public class FindLettersActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_letters);
+        selectedVoiceDir = this.getDir("default", this.MODE_PRIVATE);
 
         model = new ViewModelProvider(this.getViewModelStore(), ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())).get(FindLetterViewModel.class);
 
@@ -44,7 +46,7 @@ public class FindLettersActivity extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 Log.println(Log.DEBUG, "Find Letters", "Playing Letter "+model.secretLetter);
-                AudioUtil.playFindLetter(model.secretLetter,getFilesDir());
+                AudioUtil.playFindLetter(model.secretLetter,selectedVoiceDir.getPath());
             }
 
         });
@@ -56,7 +58,7 @@ public class FindLettersActivity extends AppCompatActivity {
     protected  void onStart() {
         super.onStart();
         if(!model.autoPlayed) {
-            AudioUtil.playFindLetter(model.secretLetter, getFilesDir());
+            AudioUtil.playFindLetter(model.secretLetter, selectedVoiceDir.getPath());
             model.autoPlayed = true;
         }
     }
@@ -103,13 +105,13 @@ public class FindLettersActivity extends AppCompatActivity {
                     grow.setZAdjustment(Animation.ZORDER_TOP);
                     if(letter.getText().equals(String.valueOf(model.secretLetter).toUpperCase())) {
                         letter.setTextColor(getResources().getColor(R.color.green));
-                        AudioUtil.playBackLetter('1', getFilesDir());
+                        AudioUtil.playBackLetter('1', selectedVoiceDir.getPath());
                         Intent intent = new Intent(self, CorrectAnswer.class);
                         startActivity(intent);
                     } else {
                         letter.setTextColor(getResources().getColor(R.color.red));
                         letter.startAnimation(grow);
-                        AudioUtil.playBackLetter('2', getFilesDir());
+                        AudioUtil.playBackLetter('2', selectedVoiceDir.getPath());
                         model.pickLetter();
                     }
                 }
