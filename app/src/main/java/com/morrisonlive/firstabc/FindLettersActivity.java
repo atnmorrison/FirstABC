@@ -1,6 +1,7 @@
 package com.morrisonlive.firstabc;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,7 +26,8 @@ public class FindLettersActivity extends AppCompatActivity {
 
     Button playButton;
     FindLetterViewModel model;
-    File selectedVoiceDir;
+    String selectedVoiceDir = null; //null means play the default audio shippped with the app
+    SharedPreferences sharedPref = null;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -33,7 +35,6 @@ public class FindLettersActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_letters);
-        selectedVoiceDir = this.getDir("default", this.MODE_PRIVATE);
 
         model = new ViewModelProvider(this.getViewModelStore(), ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())).get(FindLetterViewModel.class);
 
@@ -46,7 +47,7 @@ public class FindLettersActivity extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 Log.println(Log.DEBUG, "Find Letters", "Playing Letter "+model.secretLetter);
-                AudioUtil.playFindLetter(model.secretLetter,selectedVoiceDir.getPath());
+                AudioUtil.playFindLetter(model.secretLetter,selectedVoiceDir, getApplicationContext());
             }
 
         });
@@ -57,8 +58,16 @@ public class FindLettersActivity extends AppCompatActivity {
     @Override
     protected  void onStart() {
         super.onStart();
+
+        sharedPref = getSharedPreferences(getString(R.string.preference_file_key), this.MODE_PRIVATE);
+        String selectedVoice = sharedPref.getString(getString(R.string.preference_selected_voice), null);
+
+        if(selectedVoice != null && !selectedVoice.equals("Default Voice")) { //if they've selected default voice in record activity or haven't recorded anything use the shipped voice
+            selectedVoiceDir = getFilesDir()+File.separator+selectedVoice;
+        }
+
         if(!model.autoPlayed) {
-            AudioUtil.playFindLetter(model.secretLetter, selectedVoiceDir.getPath());
+            AudioUtil.playFindLetter(model.secretLetter, selectedVoiceDir, getApplicationContext());
             model.autoPlayed = true;
         }
     }
@@ -103,16 +112,21 @@ public class FindLettersActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View arg0){
                     grow.setZAdjustment(Animation.ZORDER_TOP);
+
+                    Log.println(Log.DEBUG, "Secret Letter", String.valueOf(model.secretLetter).toUpperCase());
+
+                    int rand = (int)Math.floor(Math.random()*3);
+
                     if(letter.getText().equals(String.valueOf(model.secretLetter).toUpperCase())) {
                         letter.setTextColor(getResources().getColor(R.color.green));
-                        AudioUtil.playBackLetter('1', selectedVoiceDir.getPath());
+                        AudioUtil.playBackLetter(Character.forDigit(rand+1,10), selectedVoiceDir, getApplicationContext());
                         Intent intent = new Intent(self, CorrectAnswer.class);
+                        model.pickLetter();
                         startActivity(intent);
                     } else {
                         letter.setTextColor(getResources().getColor(R.color.red));
                         letter.startAnimation(grow);
-                        AudioUtil.playBackLetter('2', selectedVoiceDir.getPath());
-                        model.pickLetter();
+                        AudioUtil.playBackLetter(Character.forDigit(rand+4,10), selectedVoiceDir, getApplicationContext());
                     }
                 }
             });

@@ -1,10 +1,11 @@
 package com.morrisonlive.firstabc;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.DataSetObserver;
+import android.media.AudioManager;
 import android.media.MediaRecorder;
-import android.media.audiofx.NoiseSuppressor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -13,15 +14,16 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NavUtils;
@@ -83,8 +85,10 @@ public class RecordLettersActivity extends AppCompatActivity {
         }
     };
 
-
+    private AudioManager aManager;
     private MediaRecorder mRecorder;
+    private AlertDialog.Builder alertBuilder;
+    private String selectedVoice;
 
     private Button aButton;
     public static char[] letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g',
@@ -92,15 +96,19 @@ public class RecordLettersActivity extends AppCompatActivity {
             'o', 'p', 'q', 'r', 's', 't', 'u',
             'v', 'w', 'x', 'y', 'z'};
 
-    public static String[] phrases = {"Find the letter", "That's correct!", "Nice Try!"};
+    public static String[] phrases = {"Find the letter", "That's correct!", "You got it!", "Way to go!", "Nice Try!", "Not Quiet Try Again", "Almost"};
 
     protected static final String LOG_TAG = "RecordLettersActivity";
     private boolean recording;
     private TextView instructions;
     private TextView letter;
+    private EditText newVoiceText;
     private int characterIndex;
     private int phraseIndex;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private ArrayAdapter<CharSequence> adapter;
+    private SharedPreferences sharedPref;
+    private SharedPreferences.Editor sharedPrefEditor;
 
 
     @Override
@@ -113,18 +121,60 @@ public class RecordLettersActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        alertBuilder = new AlertDialog.Builder(this);
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.recordContainer);
         voiceOptions = findViewById(R.id.selectedVoice);
+        newVoiceText = findViewById(R.id.newVoiceName);
+        sharedPref = getSharedPreferences(getString(R.string.preference_file_key), this.MODE_PRIVATE);
+        sharedPrefEditor = sharedPref.edit();
 
+        adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
 
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
+        File f = this.getFilesDir();
+        File[] files = f.listFiles();
+        for (File inFile : files) {
+            if (inFile.isDirectory()) {
+                adapter.add(inFile.getName());
+            }
+        }
+
+        adapter.add("Default Voice");
         adapter.add("New Voice");
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         voiceOptions.setAdapter(adapter);
 
+        voiceOptions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                Log.println(Log.INFO, "Selected Value", adapter.getItem(position).toString());
+
+                if(adapter.getItem(position).toString().equals("New Voice")) {
+                    newVoiceText.setVisibility(View.VISIBLE);
+                    aButton.setEnabled(true);
+                } else if(adapter.getItem(position).toString().equals("Default Voice")) {
+                    newVoiceText.setVisibility(View.INVISIBLE);
+                    sharedPrefEditor.putString(getString(R.string.preference_selected_voice),adapter.getItem(position).toString());
+                    sharedPrefEditor.commit();
+                    aButton.setEnabled(false);
+                } else {
+                    newVoiceText.setVisibility(View.INVISIBLE);
+                    sharedPrefEditor.putString(getString(R.string.preference_selected_voice),adapter.getItem(position).toString());
+                    sharedPrefEditor.commit();
+                    aButton.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                newVoiceText.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        aManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mRecorder = new MediaRecorder();
 
 
@@ -143,13 +193,10 @@ public class RecordLettersActivity extends AppCompatActivity {
         instructions = this.findViewById(R.id.instructions);
         letter	 =  this.findViewById(R.id.letter);
         letter.setVisibility(View.INVISIBLE);
-
         aButton = findViewById(R.id.record_button);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
-
-
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION );
@@ -170,13 +217,34 @@ public class RecordLettersActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+
+                selectedVoice = voiceOptions.getSelectedItem().toString();
+                if(selectedVoice.equals("New Voice") && newVoiceText.getText() != null) {
+
+                    selectedVoice = newVoiceText.getText().toString();
+
+                    if(selectedVoice == null || selectedVoice.equals("")) {
+                        alertBuilder.setMessage(R.string.enter_name_message);
+                        alertBuilder.create();
+                        alertBuilder.show();
+                        return;
+                    }
+
+                    adapter.insert(selectedVoice, 0);
+                    voiceOptions.setSelection(0);
+                    newVoiceText.setText(null);
+                    newVoiceText.setVisibility(View.INVISIBLE);
+                }
+
+
+
                 aButton.setEnabled(false);
                 instructions.setVisibility(View.INVISIBLE);
                 letter.setVisibility(View.VISIBLE);
                 recording = false;
                 characterIndex = 0;
 
-                new CountDownTimer(1000 * (letters.length+1), 1000) {
+                new CountDownTimer(1300 * (letters.length+1), 1300) {
 
                     @Override
                     public void onTick(long elapsed) {
@@ -201,7 +269,9 @@ public class RecordLettersActivity extends AppCompatActivity {
                     @Override
                     public void onFinish() {
                         try {
-                            stopRecording();
+                            if(recording) {
+                                stopRecording();
+                            }
                         } catch (Exception ex) {
                             //ignore
                         }
@@ -228,7 +298,9 @@ public class RecordLettersActivity extends AppCompatActivity {
                             public void onFinish() {
 
                                 try {
-                                    stopRecording();
+                                    if(recording) {
+                                        stopRecording();
+                                    }
                                 } catch(Exception ignored) {
 
                                 }
@@ -251,18 +323,41 @@ public class RecordLettersActivity extends AppCompatActivity {
             }
 
         });
+
+
+        if(voiceOptions.getSelectedItem().toString().equals("New Voice")) {
+            newVoiceText.setVisibility(View.VISIBLE);
+            aButton.setEnabled(true);
+        } else if(voiceOptions.getSelectedItem().toString().equals("Default Voice")) {
+            newVoiceText.setVisibility(View.INVISIBLE);
+            aButton.setEnabled(false);
+        } else {
+            aButton.setEnabled(true);
+            newVoiceText.setVisibility(View.INVISIBLE);
+        }
+
     }
 
     private void startRecording(char c) {
         recording = true;
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+
+        try {
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.UNPROCESSED);
+        } catch(Exception ex) {
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
+        }
+
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
         try{
             //the voice that is being recorded
-            String selectedVoice = "default";
-            File selectedVoiceDir = this.getDir(selectedVoice, this.MODE_PRIVATE);
-            mRecorder.setOutputFile(selectedVoiceDir.getPath() +"letter_"+c+".3gp");
+            File filesDir = this.getFilesDir();
+            File newDirectory = new File(filesDir.getPath()+File.separator+selectedVoice);
+            newDirectory.mkdirs();
+
+            Log.println(Log.INFO, "File Directory", filesDir.getPath()+File.separator+selectedVoice+File.separator +"letter_"+c+".3gp");
+
+            mRecorder.setOutputFile(filesDir.getPath()+File.separator+selectedVoice+File.separator +"letter_"+c+".3gp");
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             mRecorder.prepare();
             mRecorder.start();

@@ -6,12 +6,7 @@
         android:id="@+id/find_letters"
         android:title="@string/find_letters" />
     <item
-        android:id="@+id/name_the_letter"
-        android:title="@string/name_the_letter" />
-    <item
         android:id="@+id/record_letters"
         android:title="Record Letters"/>
-    <item
-        android:id="@+id/settings"
-        android:title="@string/settings" />
+
 </menu>

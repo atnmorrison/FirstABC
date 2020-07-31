@@ -1,9 +1,11 @@
 package com.morrisonlive.firstabc;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -18,15 +20,43 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 
+
+
 public class MainActivity extends AppCompatActivity {
 
-    File selectedVoiceDir;
+    String selectedVoiceDir = null;
+    SharedPreferences sharedPref = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        selectedVoiceDir = this.getDir("default", this.MODE_PRIVATE);
         setupLetterButtons();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadPrefrences();
+    }
+
+    private void loadPrefrences() {
+
+        sharedPref = getSharedPreferences(getString(R.string.preference_file_key), this.MODE_PRIVATE);
+        String selectedVoice = sharedPref.getString(getString(R.string.preference_selected_voice), null);
+
+        if(selectedVoice == null) {
+            Log.println(Log.INFO, "Selected Voice", "null");
+        } else {
+            Log.println(Log.INFO, "Selected Voice", selectedVoice);
+        }
+
+
+        if(selectedVoice != null && !selectedVoice.equals("Default Voice")) {
+            selectedVoiceDir = getFilesDir()+File.separator+selectedVoice;
+        } else {
+            selectedVoiceDir = null;
+        }
+
     }
 
     private void setupLetterButtons(){
@@ -94,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     int blue = (int)Math.floor(Math.random()*255);
 
                     letter.setTextColor(Color.argb(255, red, green, blue));
-                    AudioUtil.playBackLetter(mychar, selectedVoiceDir.getPath());
+                    AudioUtil.playBackLetter(mychar, selectedVoiceDir, getApplicationContext());
 
                 }
             });
@@ -119,17 +149,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.settings:
-                startSettingsActivity();
-                return true;
             case R.id.find_letters:
                 startFindLettersActivity();
                 return true;
             case R.id.record_letters:
                 startRecordActivity();
-                return true;
-            case R.id.name_the_letter:
-                startNameTheLetter();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

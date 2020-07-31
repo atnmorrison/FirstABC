@@ -27,6 +27,9 @@
     <!-- Preference Titles -->
     <string name="audio_header">App Settings</string>
     <string name="settings">Settings</string>
+    <string name="enter_name_message">Please enter a name for the new voice or select one of the existing voices to re-record</string>
+    <string name="preference_file_key">morrisonlive.com.firstabc.RECORDING_PREFERENCES</string>
+    <string name="preference_selected_voice">selected_voice</string>
 
 
 </resources>

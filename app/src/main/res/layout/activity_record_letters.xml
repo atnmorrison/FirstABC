@@ -21,6 +21,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             />
+
+        <EditText android:id="@+id/newVoiceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_margin="20dp"
+            android:digits = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            android:maxLines = "1"
+            />
         <TextView
             android:layout_marginTop="100dp"
             android:id="@+id/instructions"
