@@ -4,9 +4,14 @@ import android.annotation.SuppressLint;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
+import android.icu.text.Collator;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -15,6 +20,10 @@ import android.view.View;
  * status bar and navigation/system bar) with user interaction.
  */
 public class NameTheLetter extends AppCompatActivity {
+
+    private FindLetterViewModel model;
+    private SpeechRecognizer recognizer;
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -116,6 +125,45 @@ public class NameTheLetter extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
 
+        model = new ViewModelProvider(this.getViewModelStore(), ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())).get(FindLetterViewModel.class);
+        model.pickLetter();
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        recognizer.setRecognitionListener(new LetterRecognitionListener());
+
+    }
+
+
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        Intent intent = RecognizerIntent.getVoiceDetailsIntent(this);
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 10);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        //intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
+        recognizer.startListening(intent);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        recognizer.stopListening();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        recognizer.destroy();
     }
 
     @Override
