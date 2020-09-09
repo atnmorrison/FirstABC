@@ -130,22 +130,22 @@ public class AudioUtil {
 
         if(mPlayer == null) {
             initLetterPlayer();
-        } else {
-            if(mPlayer.isPlaying()){
-                mPlayer.stop();
-            }
+        }
 
-            try {
-                mPlayer.reset();
-                if(clipName != null) {
-                    mPlayer.setDataSource(clipName);
-                } else {
-                    mPlayer.setDataSource(context, clipNameURI);
-                }
-                mPlayer.prepareAsync();
-            } catch (IOException e) {
-                Log.e("Audio Util", "peropare failed", e);
+        if(mPlayer.isPlaying()){
+            mPlayer.stop();
+        }
+
+        try {
+            mPlayer.reset();
+            if(clipName != null) {
+                mPlayer.setDataSource(clipName);
+            } else {
+                mPlayer.setDataSource(context, clipNameURI);
             }
+            mPlayer.prepareAsync();
+        } catch (IOException e) {
+            Log.e("Audio Util", "peropare failed", e);
         }
     }
 
