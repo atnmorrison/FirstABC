@@ -155,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.record_letters:
                 startRecordActivity();
                 return true;
+            case R.id.name_letters:
+                startNameTheLetter();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

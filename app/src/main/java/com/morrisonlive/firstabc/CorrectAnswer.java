@@ -15,14 +15,10 @@ public class CorrectAnswer extends AppCompatActivity {
         setContentView(R.layout.activity_correct_answer);
 
         Button aButton = findViewById(R.id.playAgain);
-
-        final CorrectAnswer self = this;
-
         aButton.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(self, FindLettersActivity.class);
-                startActivity(intent);
+                finish();
             }
         });
 

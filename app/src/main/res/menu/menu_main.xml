@@ -8,5 +8,8 @@
     <item
         android:id="@+id/record_letters"
         android:title="Record Letters"/>
+    <item
+        android:id="@+id/name_letters"
+        android:title="Name Letters"/>
 
 </menu>
