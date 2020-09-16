@@ -1,13 +1,17 @@
 package com.morrisonlive.firstabc;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.icu.text.Collator;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -20,6 +24,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +38,7 @@ import java.util.HashMap;
  */
 public class NameTheLetter extends AppCompatActivity implements RecognitionListener {
 
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private FindLetterViewModel model;
     private SpeechRecognizer recognizer;
     private TextView nameLetterText;
@@ -217,15 +225,35 @@ public class NameTheLetter extends AppCompatActivity implements RecognitionListe
         model = new ViewModelProvider(this.getViewModelStore(), ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())).get(FindLetterViewModel.class);
         model.pickLetter();
 
-        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        recognizer.setRecognitionListener(this);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION );
+        }
+
     }
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults){
+        if(grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            finish();
+        }
+    }
 
     @Override
     protected void onStart(){
         super.onStart();
+
+        if(!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Toast.makeText(this, "Speech Recognition is unavailable", Toast.LENGTH_LONG);
+            finish();
+        }
+
+        if(recognizer == null) {
+            recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(this);
+        }
 
         nameLetterText.setText(String.valueOf(model.secretLetter).toUpperCase());
         sharedPref = getSharedPreferences(getString(R.string.preference_file_key), this.MODE_PRIVATE);
@@ -243,7 +271,7 @@ public class NameTheLetter extends AppCompatActivity implements RecognitionListe
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 50);
-        //intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
+        intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
         recognizer.startListening(intent);
     }
 
